@@ -1,0 +1,20 @@
+{
+  "name": "ingestion-api",
+  "version": "1.0.0",
+  "description": "Receives ESP32 packet data and publishes to Kafka",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "kafkajs": "^2.2.4",
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
