@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: ingestion-api
+    static_configs:
+      - targets: ['ingestion-api:3000']
+    metrics_path: /metrics
+
+  - job_name: backend-api
+    static_configs:
+      - targets: ['backend-api:4000']
+    metrics_path: /metrics
+
+  - job_name: processing-service
+    static_configs:
+      - targets: ['processing-service:5000']
+    metrics_path: /metrics

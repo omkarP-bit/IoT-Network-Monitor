@@ -6,7 +6,7 @@
 // ─── CONFIG ────────────────────────────────────────────────────────────────
 const char* WIFI_SSID     = "YOUR_WIFI_SSID";       // AP to connect for uplink
 const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
-const char* INGESTION_URL = "http://YOUR_SERVER_IP:3000/api/packets";
+const char* INGESTION_URL = "http://YOUR_SERVER_IP:3003/api/packets";
 
 const uint8_t SNIFF_CHANNEL = 1;   // Channel to sniff (1–13); change as needed
 const uint32_t SEND_INTERVAL_MS = 2000;  // Batch send every 2 seconds

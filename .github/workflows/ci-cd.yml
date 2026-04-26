@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install ingestion API dependencies
+        working-directory: services/ingestion-api/src
+        run: npm ci
+
+      - name: Install backend API dependencies
+        working-directory: services/ingestion-api/backend-api
+        run: npm ci
+
+      - name: Install processing service dependencies
+        working-directory: services/ingestion-api/processing-service
+        run: npm ci
