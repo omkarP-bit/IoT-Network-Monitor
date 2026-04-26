@@ -5,6 +5,8 @@ networks:
 volumes:
   mongo-data:
   kafka-data:
+  zookeeper-data:
+  zookeeper-log:
 
 services:
 
@@ -13,6 +15,9 @@ services:
     image: confluentinc/cp-zookeeper:7.5.0
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
     networks: [netmonitor]
 
   # ── Kafka ─────────────────────────────────────────────────────────────────
@@ -53,19 +58,26 @@ services:
 
   # ── Ingestion API ─────────────────────────────────────────────────────────
   ingestion-api:
-    build: ../services/ingestion-api/src
+    build: ../services/ingestion-api
     ports:
-      - "3003:3000"
+      - "3000:3000"
     environment:
       PORT: 3000
       KAFKA_BROKERS: kafka:9092
-    depends_on: [kafka]
+    depends_on:
+      kafka:
+        condition: service_started
     networks: [netmonitor]
-    restart: unless-stopped
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ── Processing Service ────────────────────────────────────────────────────
   processing-service:
-    build: ../services/ingestion-api/processing-service
+    build: ../services/processing-service
     environment:
       PORT: 5000
       KAFKA_BROKERS: kafka:9092
@@ -76,7 +88,7 @@ services:
 
   # ── Backend API ───────────────────────────────────────────────────────────
   backend-api:
-    build: ../services/ingestion-api/backend-api
+    build: ../services/backend-api
     ports:
       - "4000:4000"
     environment:

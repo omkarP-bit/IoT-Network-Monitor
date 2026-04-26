@@ -5,7 +5,6 @@ const FRAME_TYPE = ['Mgmt', 'Ctrl', 'Data', 'Ext'];
 function rssiBar(rssi) {
   const pct = Math.max(0, Math.min(100, ((rssi + 100) / 70) * 100));
   const color = rssi > -60 ? '#00ff9d' : rssi > -75 ? '#faad14' : '#ff4d4f';
-
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <div style={{ width: '60px', height: '6px', background: '#1e2a38', borderRadius: '3px' }}>
@@ -24,18 +23,9 @@ export default function DeviceTable({ devices, onSelect, selectedMac, onUpdate }
   }
 
   const TH = ({ children }) => (
-    <th style={{
-      textAlign: 'left',
-      padding: '8px 12px',
-      fontFamily: "'DM Sans'",
-      fontSize: '11px',
-      color: '#484f58',
-      fontWeight: 600,
-      textTransform: 'uppercase',
-      letterSpacing: '0.08em',
-      borderBottom: '1px solid #1e2a38',
-      background: '#010409',
-    }}>
+    <th style={{ textAlign: 'left', padding: '8px 12px', fontFamily: "'DM Sans'", fontSize: '11px',
+      color: '#484f58', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em',
+      borderBottom: '1px solid #1e2a38', background: '#010409' }}>
       {children}
     </th>
   );
@@ -90,15 +80,13 @@ export default function DeviceTable({ devices, onSelect, selectedMac, onUpdate }
                 </td>
                 <td style={{ padding: '10px 12px' }}>
                   <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    fontFamily: "'DM Sans'",
-                    fontSize: '11px',
-                    fontWeight: 600,
+                    display: 'inline-flex', alignItems: 'center', gap: '5px',
+                    fontFamily: "'DM Sans'", fontSize: '11px', fontWeight: 600,
                     color: isActive ? '#00ff9d' : '#484f58',
                   }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isActive ? '#00ff9d' : '#484f58', boxShadow: isActive ? '0 0 6px #00ff9d' : 'none' }} />
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%',
+                      background: isActive ? '#00ff9d' : '#484f58',
+                      boxShadow: isActive ? '0 0 6px #00ff9d' : 'none' }} />
                     {isActive ? 'Active' : 'Idle'}
                   </span>
                 </td>
@@ -107,14 +95,9 @@ export default function DeviceTable({ devices, onSelect, selectedMac, onUpdate }
                     <button
                       onClick={(e) => handleWhitelist(e, d.mac)}
                       style={{
-                        background: 'transparent',
-                        border: '1px solid #30363d',
-                        color: '#8b949e',
-                        borderRadius: '4px',
-                        padding: '3px 10px',
-                        cursor: 'pointer',
-                        fontFamily: "'DM Sans'",
-                        fontSize: '11px',
+                        background: 'transparent', border: '1px solid #30363d',
+                        color: '#8b949e', borderRadius: '4px', padding: '3px 10px',
+                        cursor: 'pointer', fontFamily: "'DM Sans'", fontSize: '11px',
                       }}
                     >
                       Trust

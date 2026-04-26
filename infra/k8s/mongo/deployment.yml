@@ -1,3 +1,5 @@
+# Apply this manually — never commit real secrets to git
+# kubectl apply -f mongo-secret.yaml -n netmonitor
 apiVersion: v1
 kind: Secret
 metadata:
@@ -5,44 +7,4 @@ metadata:
   namespace: netmonitor
 type: Opaque
 stringData:
-  uri: mongodb://mongo-service:27017/netmonitor
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mongo
-  namespace: netmonitor
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mongo
-  template:
-    metadata:
-      labels:
-        app: mongo
-    spec:
-      containers:
-        - name: mongo
-          image: mongo:7
-          ports:
-            - containerPort: 27017
-          volumeMounts:
-            - name: mongo-data
-              mountPath: /data/db
-      volumes:
-        - name: mongo-data
-          emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mongo-service
-  namespace: netmonitor
-spec:
-  selector:
-    app: mongo
-  ports:
-    - port: 27017
-      targetPort: 27017
-  type: ClusterIP
+  uri: mongodb://mongo-service:27017/netmonitor   # replace with Atlas URI in production

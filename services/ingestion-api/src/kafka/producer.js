@@ -12,21 +12,14 @@ async function connectProducer() {
   console.log('[kafka] Producer connected');
 }
 
-/**
- * Publishes a batch of packet records to the raw-packets topic.
- * @param {string} nodeId  - ESP32 node identifier
- * @param {Array}  packets - Array of packet metadata objects
- */
 async function publishPackets(nodeId, packets) {
-  const messages = packets.map((pkt) => ({
-    key: nodeId,
-    value: JSON.stringify({ nodeId, ...pkt, receivedAt: Date.now() }),
-  }));
-
-  await producer.send({
-    topic: 'raw-packets',
-    messages,
+  const messages = packets.map(function(pkt) {
+    return {
+      key: nodeId,
+      value: JSON.stringify(Object.assign({ nodeId: nodeId }, pkt, { receivedAt: Date.now() })),
+    };
   });
+  await producer.send({ topic: 'raw-packets', messages: messages });
 }
 
 module.exports = { connectProducer, publishPackets };

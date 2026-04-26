@@ -16,8 +16,6 @@ spec:
       containers:
         - name: processing-service
           image: ghcr.io/YOUR_ORG/processing-service:latest
-          ports:
-            - containerPort: 5000
           env:
             - name: KAFKA_BROKERS
               value: kafka-service:9092
@@ -33,16 +31,3 @@ spec:
             limits:
               cpu: "400m"
               memory: "512Mi"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: processing-service
-  namespace: netmonitor
-spec:
-  selector:
-    app: processing-service
-  ports:
-    - port: 5000
-      targetPort: 5000
-  type: ClusterIP

@@ -1,82 +1,104 @@
 {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": "-- Grafana --",
-        "enable": true,
-        "hide": true,
-        "iconColor": "#000000",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
-  },
+  "__inputs": [],
+  "__requires": [],
+  "annotations": { "list": [] },
   "editable": true,
-  "gnetId": null,
-  "graphTooltip": 0,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
   "id": null,
   "links": [],
   "panels": [
     {
-      "type": "timeseries",
-      "title": "Ingestion Packet Rate",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-      "targets": [
-        {
-          "expr": "increase(ingestion_packets_received_total[1m])",
-          "legendFormat": "packets/min",
-          "refId": "A"
-        }
-      ],
+      "datasource": "Prometheus",
       "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
-        },
+        "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }] }, "unit": "short" },
         "overrides": []
-      }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Packets Received (total)",
+      "type": "stat",
+      "targets": [{ "expr": "ingestion_packets_received_total", "legendFormat": "packets" }]
     },
     {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }] }, "unit": "percent" },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Ingestion API CPU %",
       "type": "stat",
-      "title": "Ingestion API Health",
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [{ "expr": "rate(process_cpu_seconds_total{job=\"ingestion-api\"}[1m]) * 100", "legendFormat": "cpu" }]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 200000000 }, { "color": "red", "value": 400000000 }] }, "unit": "bytes" },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Ingestion API Heap",
+      "type": "stat",
+      "targets": [{ "expr": "nodejs_heap_size_used_bytes{job=\"ingestion-api\"}", "legendFormat": "heap" }]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "reqps" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "id": 4,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "title": "Packet Ingestion Rate (per second)",
+      "type": "timeseries",
+      "targets": [{ "expr": "rate(ingestion_packets_received_total[1m])", "legendFormat": "packets/s" }]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "bytes" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "id": 5,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "title": "Heap Usage — All Services",
+      "type": "timeseries",
       "targets": [
-        {
-          "expr": "up{job=\"ingestion-api\"}",
-          "refId": "A"
-        }
+        { "expr": "nodejs_heap_size_used_bytes{job=\"ingestion-api\"}", "legendFormat": "ingestion-api" },
+        { "expr": "nodejs_heap_size_used_bytes{job=\"backend-api\"}", "legendFormat": "backend-api" }
       ]
     },
     {
-      "type": "stat",
-      "title": "Backend API Health",
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 4 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "s" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "id": 6,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "title": "Event Loop Lag — All Services",
+      "type": "timeseries",
       "targets": [
-        {
-          "expr": "up{job=\"backend-api\"}",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "type": "stat",
-      "title": "Processing Service Health",
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 8 },
-      "targets": [
-        {
-          "expr": "up{job=\"processing-service\"}",
-          "refId": "A"
-        }
+        { "expr": "nodejs_eventloop_lag_seconds{job=\"ingestion-api\"}", "legendFormat": "ingestion-api" },
+        { "expr": "nodejs_eventloop_lag_seconds{job=\"backend-api\"}", "legendFormat": "backend-api" }
       ]
     }
   ],
-  "schemaVersion": 36,
-  "style": "dark",
-  "tags": ["iot", "network", "monitoring"],
-  "time": { "from": "now-1h", "to": "now" },
-  "title": "IoT Network Monitoring Dashboard",
-  "uid": "iot-network-monitor-dashboard",
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "tags": ["iot", "netmonitor"],
+  "time": { "from": "now-30m", "to": "now" },
+  "timepicker": {},
+  "title": "NetMonitor — IoT Dashboard",
+  "uid": "netmonitor-main",
   "version": 1
 }

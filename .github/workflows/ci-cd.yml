@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,35 +6,118 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  REGISTRY: ghcr.io
+  ORG: ${{ github.repository_owner }}
+
 jobs:
-  build:
+  # ── Lint & Test ─────────────────────────────────────────────────────────────
+  test:
+    name: Test Services
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20]
+        service: [ingestion-api, processing-service, backend-api]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v5
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: services/${{ matrix.service }}/package-lock.json
 
-      - name: Build frontend
-        working-directory: frontend
+      - name: Install dependencies
+        run: npm ci
+        working-directory: services/${{ matrix.service }}
+
+      - name: Lint
+        run: npx eslint src --ext .js --max-warnings 0
+        working-directory: services/${{ matrix.service }}
+        continue-on-error: true  # remove once lint is configured
+
+  # ── Build & Push Docker Images ───────────────────────────────────────────────
+  build:
+    name: Build & Push
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        include:
+          - service: ingestion-api
+            context: services/ingestion-api
+          - service: processing-service
+            context: services/processing-service
+          - service: backend-api
+            context: services/backend-api
+          - service: frontend
+            context: frontend
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push ${{ matrix.service }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service }}:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── Deploy to Kubernetes ──────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to K8s
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubeconfig
+        run: echo "${{ secrets.KUBECONFIG }}" | base64 -d > /tmp/kubeconfig
+
+      - name: Apply namespace
+        run: kubectl apply -f infra/k8s/namespace.yaml --kubeconfig /tmp/kubeconfig
+
+      - name: Deploy all services
         run: |
-          npm ci
-          npm run build
+          kubectl apply -f infra/k8s/ingestion-api/   --kubeconfig /tmp/kubeconfig
+          kubectl apply -f infra/k8s/processing-service/ --kubeconfig /tmp/kubeconfig
+          kubectl apply -f infra/k8s/backend-api/     --kubeconfig /tmp/kubeconfig
+          kubectl apply -f infra/k8s/frontend/        --kubeconfig /tmp/kubeconfig
 
-      - name: Install ingestion API dependencies
-        working-directory: services/ingestion-api/src
-        run: npm ci
+      - name: Update image tags to latest commit SHA
+        run: |
+          kubectl set image deployment/ingestion-api    ingestion-api=${{ env.REGISTRY }}/${{ env.ORG }}/ingestion-api:${{ github.sha }}    -n netmonitor --kubeconfig /tmp/kubeconfig
+          kubectl set image deployment/processing-service processing-service=${{ env.REGISTRY }}/${{ env.ORG }}/processing-service:${{ github.sha }} -n netmonitor --kubeconfig /tmp/kubeconfig
+          kubectl set image deployment/backend-api      backend-api=${{ env.REGISTRY }}/${{ env.ORG }}/backend-api:${{ github.sha }}      -n netmonitor --kubeconfig /tmp/kubeconfig
+          kubectl set image deployment/frontend         frontend=${{ env.REGISTRY }}/${{ env.ORG }}/frontend:${{ github.sha }}         -n netmonitor --kubeconfig /tmp/kubeconfig
 
-      - name: Install backend API dependencies
-        working-directory: services/ingestion-api/backend-api
-        run: npm ci
-
-      - name: Install processing service dependencies
-        working-directory: services/ingestion-api/processing-service
-        run: npm ci
+      - name: Verify rollouts
+        run: |
+          kubectl rollout status deployment/ingestion-api    -n netmonitor --kubeconfig /tmp/kubeconfig
+          kubectl rollout status deployment/processing-service -n netmonitor --kubeconfig /tmp/kubeconfig
+          kubectl rollout status deployment/backend-api      -n netmonitor --kubeconfig /tmp/kubeconfig
+          kubectl rollout status deployment/frontend         -n netmonitor --kubeconfig /tmp/kubeconfig

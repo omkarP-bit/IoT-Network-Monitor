@@ -1,50 +1,65 @@
 import { resolveAlert } from '../api/client';
 
+const SEVERITY_COLOR = { high: '#ff4d4f', medium: '#faad14', low: '#52c41a' };
+const TYPE_LABEL = {
+  rogue_device:   '🚨 Rogue Device',
+  traffic_spike:  '📈 Traffic Spike',
+  signal_anomaly: '📡 Signal Anomaly',
+};
+
 export default function AlertList({ alerts, onResolve }) {
-  if (!alerts.length) {
-    return <div style={{ color: '#8b949e', fontFamily: "'DM Sans'", fontSize: '13px' }}>No active alerts detected.</div>;
+  if (!alerts.length) return (
+    <div style={{ color: '#484f58', fontFamily: "'DM Sans'", padding: '20px 0', textAlign: 'center' }}>
+      No active alerts
+    </div>
+  );
+
+  async function handleResolve(id) {
+    await resolveAlert(id);
+    onResolve();
   }
 
   return (
-    <div style={{ display: 'grid', gap: '12px' }}>
-      {alerts.map(alert => (
-        <div key={alert._id} style={{
-          background: '#020617',
-          border: '1px solid #1e2a38',
-          borderRadius: '10px',
-          padding: '14px',
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {alerts.map(a => (
+        <div key={a._id} style={{
+          background: '#0d1117',
+          border: `1px solid #1e2a38`,
+          borderLeft: `4px solid ${SEVERITY_COLOR[a.severity] || '#888'}`,
+          borderRadius: '4px',
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '8px' }}>
-            <div>
-              <div style={{ color: '#e6edf3', fontWeight: 700, marginBottom: '4px' }}>{alert.message}</div>
-              <div style={{ color: '#8b949e', fontSize: '12px' }}>Type: {alert.type} · Severity: {alert.severity}</div>
+          <div>
+            <div style={{ fontFamily: "'DM Sans'", fontWeight: 600, color: '#e6edf3', fontSize: '14px' }}>
+              {TYPE_LABEL[a.type] || a.type}
             </div>
-            {!alert.resolved && (
-              <button
-                onClick={async () => {
-                  await resolveAlert(alert._id);
-                  onResolve();
-                }}
-                style={{
-                  border: '1px solid #30363d',
-                  background: 'transparent',
-                  color: '#8b949e',
-                  borderRadius: '6px',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  fontFamily: "'DM Sans'",
-                  fontSize: '11px',
-                }}
-              >
-                Resolve
-              </button>
-            )}
+            <div style={{ fontFamily: "'DM Sans'", color: '#8b949e', fontSize: '12px', marginTop: '2px' }}>
+              {a.message}
+            </div>
+            <div style={{ fontFamily: "'Space Mono'", color: '#484f58', fontSize: '10px', marginTop: '4px' }}>
+              {new Date(a.createdAt).toLocaleTimeString()}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', fontSize: '12px', color: '#6e7681' }}>
-            <span>MAC: {alert.mac || 'n/a'}</span>
-            <span>Node: {alert.nodeId || 'unknown'}</span>
-            <span>{new Date(alert.createdAt).toLocaleString()}</span>
-          </div>
+          <button
+            onClick={() => handleResolve(a._id)}
+            style={{
+              background: 'transparent',
+              border: '1px solid #30363d',
+              color: '#8b949e',
+              borderRadius: '4px',
+              padding: '4px 12px',
+              cursor: 'pointer',
+              fontFamily: "'DM Sans'",
+              fontSize: '12px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Resolve
+          </button>
         </div>
       ))}
     </div>
