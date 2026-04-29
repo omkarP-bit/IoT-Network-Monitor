@@ -503,7 +503,7 @@ useEffect(() => {
                 <span style={{ color: '#6f5c28' }}>]</span>
                 <span style={{ color: '#8d7750', fontSize: '11px' }}>// active</span>
                 {/* tiny cat in header */}
-                <span style={{ color: '#3a2a00', fontSize: '11px' }}>{'›(^.^)‹'}</span>
+                <span style={{ color: '#7ab0c0', fontSize: '11px' }}>{'›(^.^)‹'}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '11px' }}>
                 <span style={{ color: '#8d7750' }}>DEV[{String(devices.length).padStart(2,'0')}]</span>
@@ -636,8 +636,8 @@ whiteSpace: 'pre', minHeight: activated ? 'auto' : '100vh', display: 'flex', fle
                   flexDirection: 'column',
                   justifyContent: 'center',
                 }}>
-                  <div style={{ fontSize: '10px', color: '#2a1a00', letterSpacing: '0.2em', marginBottom: '4px' }}>MASCOT</div>
-                  <div style={{ fontSize: '11px', color: '#3a2a00', lineHeight: 1.5, fontFamily: "'IBM Plex Mono', monospace" }}>
+                  <div style={{ fontSize: '10px', color: '#8d7750', letterSpacing: '0.2em', marginBottom: '4px' }}>MASCOT</div>
+<div style={{ fontSize: '11px', color: '#c8a870', lineHeight: 1.5, fontFamily: "'IBM Plex Mono', monospace" }}>
                     <div>{'/\\_/\\'}</div>
                     <div className="cat-eyes">{'(o . o)'}</div>
                     <div>{'> ^ <'}</div>
@@ -678,38 +678,170 @@ whiteSpace: 'pre', minHeight: activated ? 'auto' : '100vh', display: 'flex', fle
 
                 {/* alerts */}
                 <div style={{ background: '#0a0a0a', border: '1px solid #1a1500' }}>
-                  <div style={{ padding: '14px 20px', borderBottom: '1px solid #1a1500', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontSize: '10px', color: alerts.length > 0 ? '#ff4d4f44' : '#8d7750', letterSpacing: '0.2em', marginBottom: '4px' }}>├── ALERT_DAEMON</div>
-                      <div style={{ fontSize: '15px', color: '#c8a870' }}>
-                        <span style={{ color: '#b29652' }}>$</span> tail -f /var/log/anomaly
-                      </div>
-                    </div>
-                    {alerts.length > 0 && (
-                      <span style={{ color: '#ff4d4f', fontSize: '11px', animation: 'pulse 1s infinite' }}>
-                        [!!{String(alerts.length).padStart(2, '0')}!!]
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ padding: '12px' }}>
-                    {alerts.length === 0 && (
-                      <div style={{ padding: '20px', textAlign: 'center', fontSize: '11px', color: '#6f5c28', letterSpacing: '0.15em' }}>
-                        <div style={{ marginBottom: '4px' }}>{'/\\_/\\'}</div>
-                        <div style={{ marginBottom: '4px' }} className="cat-eyes">{'(- . -)'}</div>
-                        <div style={{ marginBottom: '8px' }}>{'>  <'}</div>
-                        <div style={{ marginBottom: '6px' }}>{'>_ no anomalies detected'}</div>
-                        <div>// system nominal — cat is calm</div>
-                      </div>
-                    )}
-                    <AlertList alerts={alerts} onResolve={fetchAll} />
-                  </div>
-                </div>
+
+  <div
+    style={{
+      padding: '14px 20px',
+      borderBottom: '1px solid #1a1500',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    }}
+  >
+    <div>
+      <div
+        style={{
+          fontSize: '10px',
+          color: alerts.length > 0 ? '#ff4d4f44' : '#8d7750',
+          letterSpacing: '0.2em',
+          marginBottom: '4px'
+        }}
+      >
+        ├── ALERT_DAEMON
+      </div>
+
+      <div
+        style={{
+          fontSize: '15px',
+          color: '#c8a870'
+        }}
+      >
+        <span style={{ color: '#b29652' }}>$</span> tail -f /var/log/anomaly
+      </div>
+    </div>
+
+    {alerts.length > 0 && (
+      <span
+        style={{
+          color: '#ff4d4f',
+          fontSize: '11px',
+          animation: 'pulse 1s infinite'
+        }}
+      >
+        [!!{String(alerts.length).padStart(2,'0')}!!]
+      </span>
+    )}
+  </div>
+
+
+  <div
+    style={{
+      padding:'12px',
+      display:'flex',
+      flexDirection:'column',
+      minHeight:'calc(100vh - 320px)'
+    }}
+  >
+
+    {alerts.length === 0 && (
+      <div
+        style={{
+          padding:'20px',
+          textAlign:'center',
+          fontSize:'11px',
+          color:'#6f5c28',
+          letterSpacing:'0.15em'
+        }}
+      >
+        <div style={{ marginBottom:'4px' }}>{'/\\_/\\'}</div>
+
+        <div
+          style={{ marginBottom:'4px' }}
+          className="cat-eyes"
+        >
+          {'(- . -)'}
+        </div>
+
+        <div style={{ marginBottom:'8px' }}>{'>  <'}</div>
+
+        <div style={{ marginBottom:'6px' }}>
+          {'>_ no anomalies detected'}
+        </div>
+
+        <div>
+          // system nominal — cat is calm
+        </div>
+      </div>
+    )}
+
+
+    <AlertList
+      alerts={alerts}
+      onResolve={fetchAll}
+    />
+
+
+    {/* bottom filler pushes cat into empty vertical gap */}
+    <div
+      style={{
+        flex:1,
+        display:'flex',
+        alignItems:'flex-end',
+        justifyContent:'center',
+        paddingTop:'24px'
+      }}
+    >
+      <div
+        style={{
+          textAlign:'center',
+          border:'1px solid #433515',
+          background:'#0f0f0f',
+          padding:'12px 14px',
+          width:'220px'
+        }}
+      >
+        <div
+          style={{
+            fontSize:'10px',
+            color:'#8d7750',
+            letterSpacing:'0.18em',
+            marginBottom:'8px'
+          }}
+        >
+          └── CAT_DAEMON
+        </div>
+
+        <div
+          style={{
+            fontSize:'11px',
+            color:'#b29652',
+            marginBottom:'10px'
+          }}
+        >
+          $ watch cat-monitor --tail
+        </div>
+
+        <img
+          src="/cat.gif"
+          alt="cat daemon"
+          style={{
+            width:'170px',
+            maxWidth:'100%',
+            imageRendering:'pixelated',
+            border:'1px solid #6f5c28'
+          }}
+        />
+
+        <div
+          style={{
+            marginTop:'8px',
+            color:'#6f5c28',
+            fontSize:'10px'
+          }}
+        >
+          process status: purring
+        </div>
+        </div>
+        </div>
+         </div>  {/* ADD THIS — closes inner alerts content wrapper (the padding:'12px' div) */}
+</div>
+
               </div>
 
               {/* footer with cat */}
               <div style={{ marginTop: '28px', paddingTop: '14px', borderTop: '1px solid #1a1500', display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#1a1400', letterSpacing: '0.12em' }}>
-                <span>// netmonitor v2.4.1 — arch linux — rolling</span>
-                <span style={{ color: '#2a1a00' }}>{'>^..^<'} &nbsp; watching the net</span>
+                <span style={{ color: '#6f5c28' }}>// netmonitor v2.4.1 — arch linux — rolling</span>
+                <span style={{ color: '#6f5c28' }}>{'>^..^<'} &nbsp; watching the net</span>
                 <span>poll={POLL_MS}ms</span>
               </div>
             </div>
